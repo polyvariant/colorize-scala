@@ -35,5 +35,26 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
     ),
   )
 
+lazy val site = project
+  .in(file("site"))
+  .settings(
+    mdocOut := file("."),
+    mdocVariables := Map(
+      "VERSION" -> {
+        if (isSnapshot.value)
+          tlLatestVersion.value.getOrElse("0.1.0" /* first planned release */ )
+        else
+          version.value
+      }
+    ),
+    ThisBuild / githubWorkflowBuild +=
+      WorkflowStep.Sbt(
+        List("site/mdoc --check"),
+        cond = Some(s"matrix.scala == '$Scala213'"),
+      ),
+  )
+  .dependsOn(core.jvm)
+  .enablePlugins(MdocPlugin, NoPublishPlugin)
+
 lazy val root = tlCrossRootProject
   .aggregate(core)

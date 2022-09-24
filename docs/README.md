@@ -6,42 +6,28 @@ Scala microlibrary for ANSI colored strings.
 
 ```scala
 // for normal usage
-"org.polyvariant" %% "colorize" % "0.1.0"
+"org.polyvariant" %% "colorize" % "@VERSION@"
 // for Scala.js
-"org.polyvariant" %%% "colorize" % "0.1.0"
+"org.polyvariant" %%% "colorize" % "@VERSION@"
 ```
 
 ## Usage
 
-```scala
+```scala mdoc
 import org.polyvariant.colorize._
 ```
 
 You can colorize any string by calling `.colorize`, `.overlay`, or one of the default helpers (we define one for each color in scala's `AnsiColor` trait):
 
-```scala
+```scala mdoc
 "hello".red
-// res0: ColorizedString = Overlay(
-//   underlying = Wrap(s = "hello"),
-//   prefix = "\u001b[31m"
-// )
 ```
 
 If you colorize a string twice, the displayed color will be the one you used first.
 This also applies if the string is part of a larger colored string:
 
-```scala
+```scala mdoc
 colorize"hello ${"world".blue}.red"
-// res1: ColorizedString = Concat(
-//   lhs = Wrap(s = "hello "),
-//   rhs = Concat(
-//     lhs = Wrap(s = ""),
-//     rhs = Concat(
-//       lhs = Overlay(underlying = Wrap(s = "world"), prefix = "\u001b[34m"),
-//       rhs = Wrap(s = ".red")
-//     )
-//   )
-// )
 ```
 
 This will render as "hello" in red and "world" in blue.
@@ -49,19 +35,15 @@ This will render as "hello" in red and "world" in blue.
 As you've seen, There's a `colorize` string interpolator which allows you to easily nest colorized strings in each other.
 You can also combine colorized strings with `++`:
 
-```scala
+```scala mdoc
 "hello ".red ++ "world".blue
-// res2: ColorizedString = Concat(
-//   lhs = Overlay(underlying = Wrap(s = "hello "), prefix = "\u001b[31m"),
-//   rhs = Overlay(underlying = Wrap(s = "world"), prefix = "\u001b[34m")
-// )
 ```
 
 ## Rendering
 
 To actually render a colorized string, call `.render`.
 
-```scala
+```scala mdoc:silent
 println("hello".red.render) // like this
 ```
 
@@ -70,9 +52,8 @@ Internally, `colorize` works by prepending the desired color sequence to your st
 
 To apply customizations, use `renderConfigured`:
 
-```scala
+```scala mdoc
 println("hello".overlay("<RED>").renderConfigured(RenderConfig(resetString = "<RESET>")))
-// <RED>hello<RESET>
 ```
 
 ## Color removal
