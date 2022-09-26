@@ -27,7 +27,11 @@ object ColorizeExample extends App {
 
   val s3 = "things like " ++ "underlined".underlined ++ " and " ++ "bold".bold ++ " text also work."
 
+  val s4 =
+    colorize"you can combine modifiers like ${"bold".bold.magenta}/${"underlined".underlined.yellow} with ${"colors".bold.underlined.cyan} too!"
+
   println(s.render)
   println(s2.render)
   println(s3.render)
+  println(s4.render)
 }
