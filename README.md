@@ -6,9 +6,9 @@ Scala microlibrary for ANSI colored strings.
 
 ```scala
 // for normal usage
-"org.polyvariant" %% "colorize" % "0.1.0"
+"org.polyvariant" %% "colorize" % "0.1.1"
 // for Scala.js / Scala Native
-"org.polyvariant" %%% "colorize" % "0.1.0"
+"org.polyvariant" %%% "colorize" % "0.1.1"
 ```
 
 ## Usage
