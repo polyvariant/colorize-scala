@@ -34,10 +34,14 @@ class ColorizeTests extends munit.FunSuite {
     assertEquals("hello".overlay("a").renderConfigured(testConfig), s"ahello$R")
   }
 
-  test("overlay doesn't remove already set color") {
+  test("overlay wraps already set color") {
     assertEquals(
       "hello".overlay("blue").overlay("red").renderConfigured(testConfig),
-      "hello".overlay("blue").renderConfigured(testConfig),
+      "hello"
+        .overlay("blue")
+        .renderConfigured(testConfig)
+        .overlay("red")
+        .renderConfigured(testConfig),
     )
   }
 

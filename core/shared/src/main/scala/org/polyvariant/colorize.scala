@@ -40,18 +40,15 @@ object colorize {
 
     def renderConfigured(config: RenderConfig): String = {
 
-      def go(self: ColorizedString, currentColor: Option[String]): String =
+      def go(self: ColorizedString, currentColors: List[String]): String =
         self match {
           case Wrap(s) =>
-            currentColor match {
-              case Some(c) => c + s + config.resetString
-              case None    => s
-            }
-          case Overlay(underlying, prefix) => go(underlying, currentColor = Some(prefix))
-          case Concat(lhs, rhs)            => go(lhs, currentColor) + go(rhs, currentColor)
+            currentColors.foldLeft(s)((text, color) => color + text + config.resetString)
+          case Overlay(underlying, prefix) => go(underlying, prefix :: currentColors)
+          case Concat(lhs, rhs)            => go(lhs, currentColors) + go(rhs, currentColors)
         }
 
-      go(this, currentColor = None)
+      go(this, currentColors = Nil)
 
     }
 
