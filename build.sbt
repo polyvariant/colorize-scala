@@ -1,4 +1,4 @@
-ThisBuild / tlBaseVersion := "0.1"
+ThisBuild / tlBaseVersion := "0.2"
 ThisBuild / organization := "org.polyvariant"
 ThisBuild / organizationName := "Polyvariant"
 ThisBuild / startYear := Some(2022)
