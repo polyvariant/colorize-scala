@@ -27,11 +27,15 @@ object colorize {
 
   implicit class ColorizeStringContext(private val sc: StringContext) extends AnyVal {
 
-    def colorize(parts: ColorizedString*): ColorizedString =
-      ColorizedString.wrap(sc.parts.head) ++ parts
-        .zip(sc.parts.tail)
+    def colorize(args: ColorizedString*): ColorizedString = {
+      StringContext.checkLengths(args, sc.parts)
+      val partsEscaped = sc.parts.map(StringContext.processEscapes(_))
+
+      ColorizedString.wrap(partsEscaped.head) ++ args
+        .zip(partsEscaped.tail)
         .map { case (p, s) => p ++ ColorizedString.wrap(s) }
         .foldLeft(ColorizedString.empty)(_ ++ _)
+    }
 
   }
 

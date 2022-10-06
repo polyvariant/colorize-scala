@@ -83,4 +83,25 @@ class ColorizeTests extends munit.FunSuite {
     )
   }
 
+  test("newlines in colorize interpolator") {
+    assertEquals(
+      colorize"\n".render,
+      "\n",
+    )
+  }
+
+  test("newlines in more complex colorize interpolator") {
+    assertEquals(
+      colorize"\n${"aa".overlay("red")}\n${"bb".overlay("blue")}\n".renderConfigured(testConfig),
+      s"\nredaa${R}\nbluebb$R\n",
+    )
+  }
+
+  test("newlines in colorized strings") {
+    assertEquals(
+      "\n".overlay("test").renderConfigured(testConfig),
+      s"test\n$R",
+    )
+  }
+
 }
