@@ -28,7 +28,13 @@ object colorize {
   implicit class ColorizeStringContext(private val sc: StringContext) extends AnyVal {
 
     def colorize(args: ColorizedString*): ColorizedString = {
-      StringContext.checkLengths(args, sc.parts)
+      // not available in Scala 2.12 - restore when 2.12 support is dropped
+      // StringContext.checkLengths(args, sc.parts)
+      assert(
+        args.length == sc.parts.length - 1,
+        "Number of arguments must match number of interpolations",
+      )
+
       val partsEscaped = sc.parts.map(StringContext.processEscapes(_))
 
       ColorizedString.wrap(partsEscaped.head) ++ args
