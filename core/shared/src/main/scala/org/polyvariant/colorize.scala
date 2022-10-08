@@ -50,12 +50,23 @@ object colorize {
 
     def renderConfigured(config: RenderConfig): String = {
 
-      def go(self: ColorizedString, currentColors: List[String]): String =
+      val render: (Color, String) => String =
+        config.mode match {
+          case ColorMode.Ansi =>
+            (color, text) =>
+              color match {
+                case Color.Ansi(prefix) => prefix + text + config.resetString
+                case _                  => text
+              }
+
+          case ColorMode.TrueColor => (color, text) => color.prefix + text + config.resetString
+        }
+
+      def go(self: ColorizedString, currentColors: List[Color]): String =
         self match {
-          case Wrap(s) =>
-            currentColors.foldLeft(s)((text, color) => color + text + config.resetString)
-          case Overlay(underlying, prefix) => go(underlying, prefix :: currentColors)
-          case Concat(lhs, rhs)            => go(lhs, currentColors) + go(rhs, currentColors)
+          case Wrap(s) => currentColors.foldLeft(s)((text, color) => render(color, text))
+          case Overlay(underlying, color) => go(underlying, color :: currentColors)
+          case Concat(lhs, rhs)           => go(lhs, currentColors) + go(rhs, currentColors)
         }
 
       go(this, currentColors = Nil)
@@ -68,7 +79,12 @@ object colorize {
       newColor: String
     ): ColorizedString = ColorizedString.Overlay(
       underlying = this,
-      prefix = newColor,
+      color = Color.Ansi(newColor),
+    )
+
+    def rgb(red: Int, green: Int, blue: Int): ColorizedString = ColorizedString.Overlay(
+      underlying = this,
+      color = Color.Rgb(red, green, blue),
     )
 
     def colored(pickColor: AnsiColor => String): ColorizedString = overlay(pickColor(Console))
@@ -103,10 +119,23 @@ object colorize {
     def invisible: ColorizedString = colored(_.INVISIBLE)
   }
 
+  private[colorize] sealed trait Color {
+    def prefix: String
+  }
+
+  private[colorize] object Color {
+    private[colorize] final case class Ansi(prefix: String) extends Color
+
+    private[colorize] final case class Rgb(red: Int, green: Int, blue: Int) extends Color {
+      def prefix: String = s"\u001b[38;2;$red;$green;${blue}m"
+    }
+
+  }
+
   object ColorizedString {
     private[colorize] final case class Wrap(s: String) extends ColorizedString
 
-    private[colorize] final case class Overlay(underlying: ColorizedString, prefix: String)
+    private[colorize] final case class Overlay(underlying: ColorizedString, color: Color)
       extends ColorizedString
 
     private[colorize] final case class Concat(lhs: ColorizedString, rhs: ColorizedString)
@@ -121,12 +150,40 @@ object colorize {
 
   private[colorize] case class CurrentColor(value: String) extends AnyVal
 
+  sealed trait ColorMode
+
+  object ColorMode {
+    private[colorize] case object Ansi extends ColorMode
+    private[colorize] case object TrueColor extends ColorMode
+  }
+
   final case class RenderConfig(
-    resetString: String
+    mode: ColorMode,
+    resetString: String,
   )
 
   object RenderConfig {
-    val Default: RenderConfig = RenderConfig(resetString = Console.RESET)
+    private val TrueColorFlags = Set("truecolor", "24bit")
+
+    val Default: RenderConfig = RenderConfig(mode = ColorMode.Ansi, resetString = Console.RESET)
+
+    def determine: RenderConfig =
+      if (isTrueColor)
+        trueColor
+      else
+        ansi
+
+    val ansi: RenderConfig = RenderConfig(mode = ColorMode.Ansi, resetString = Console.RESET)
+
+    val trueColor: RenderConfig = RenderConfig(
+      mode = ColorMode.TrueColor,
+      resetString = Console.RESET,
+    )
+
+    private def isTrueColor: Boolean = EnvPlatform
+      .get("COLORTERM")
+      .exists(TrueColorFlags.contains)
+
   }
 
 }

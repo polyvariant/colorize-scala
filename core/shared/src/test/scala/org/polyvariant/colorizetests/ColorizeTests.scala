@@ -21,7 +21,8 @@ class ColorizeTests extends munit.FunSuite {
 
   import org.polyvariant.colorize._
 
-  val testConfig = RenderConfig(resetString = R)
+  val testConfig = RenderConfig.ansi.copy(resetString = R)
+  val trueColorTestConfig = RenderConfig.trueColor.copy(resetString = R)
 
   test("wrapped string renders directly") {
     assertEquals(
@@ -101,6 +102,20 @@ class ColorizeTests extends munit.FunSuite {
     assertEquals(
       "\n".overlay("test").renderConfigured(testConfig),
       s"test\n$R",
+    )
+  }
+
+  test("render RGB overlay in TrueColor mode") {
+    assertEquals(
+      "text".rgb(255, 0, 0).renderConfigured(trueColorTestConfig),
+      s"\u001b[38;2;255;0;0mtext$R",
+    )
+  }
+
+  test("ignore RGB overlay in Ansi mode") {
+    assertEquals(
+      "text".rgb(255, 0, 0).renderConfigured(testConfig),
+      "text",
     )
   }
 
