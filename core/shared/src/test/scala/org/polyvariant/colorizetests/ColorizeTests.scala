@@ -16,32 +16,36 @@
 
 package org.polyvariant.colorizetests
 
+import org.polyvariant.colorize.custom.ConfiguredColorize
+import org.polyvariant.colorize.custom.RenderConfig
+import org.polyvariant.colorize.string.ColorizedString
+
 class ColorizeTests extends munit.FunSuite {
   private val R = "_RESET_"
 
-  import org.polyvariant.colorize._
+  val colorize = new ConfiguredColorize(RenderConfig.ansi.copy(resetString = R))
 
-  val testConfig = RenderConfig(resetString = R)
+  import colorize._
 
   test("wrapped string renders directly") {
     assertEquals(
-      "hello".renderConfigured(testConfig),
+      "hello".render,
       "hello",
     )
   }
 
   test("overlay whole string prepends the desired string") {
-    assertEquals("hello".overlay("a").renderConfigured(testConfig), s"ahello$R")
+    assertEquals("hello".overlay("a").render, s"ahello$R")
   }
 
   test("overlay wraps already set color") {
     assertEquals(
-      "hello".overlay("blue").overlay("red").renderConfigured(testConfig),
+      "hello".overlay("blue").overlay("red").render,
       "hello"
         .overlay("blue")
-        .renderConfigured(testConfig)
+        .render
         .overlay("red")
-        .renderConfigured(testConfig),
+        .render,
     )
   }
 
@@ -49,7 +53,7 @@ class ColorizeTests extends munit.FunSuite {
     assertEquals(
       (ColorizedString.wrap("first") ++ ColorizedString.wrap("second"))
         .overlay("X")
-        .renderConfigured(testConfig),
+        .render,
       s"Xfirst${R}Xsecond$R",
     )
   }
@@ -57,29 +61,29 @@ class ColorizeTests extends munit.FunSuite {
   test("dropOverlays removes all prefixes/suffixes") {
     assertEquals(
       ("hello".overlay("blue") ++ "world"
-        .overlay("red")).overlay("green").dropOverlays.renderConfigured(testConfig),
+        .overlay("red")).overlay("green").dropOverlays.render,
       "helloworld",
     )
   }
 
   test("interpolator: no colors") {
     assertEquals(
-      colorize"aa".renderConfigured(testConfig),
-      ColorizedString.wrap("aa").renderConfigured(testConfig),
+      colorize"aa".render,
+      ColorizedString.wrap("aa").render,
     )
   }
 
   test("interpolator: single color") {
     assertEquals(
-      colorize"${"aa".overlay("red")}".renderConfigured(testConfig),
-      "aa".overlay("red").renderConfigured(testConfig),
+      colorize"${"aa".overlay("red")}".render,
+      "aa".overlay("red").render,
     )
   }
 
   test("interpolator: multiple colors") {
     assertEquals(
-      colorize"${"aa".overlay("red")} and ${"bb".overlay("blue")}".renderConfigured(testConfig),
-      ("aa".overlay("red") ++ " and " ++ "bb".overlay("blue")).renderConfigured(testConfig),
+      colorize"${"aa".overlay("red")} and ${"bb".overlay("blue")}".render,
+      ("aa".overlay("red") ++ " and " ++ "bb".overlay("blue")).render,
     )
   }
 
@@ -92,16 +96,46 @@ class ColorizeTests extends munit.FunSuite {
 
   test("newlines in more complex colorize interpolator") {
     assertEquals(
-      colorize"\n${"aa".overlay("red")}\n${"bb".overlay("blue")}\n".renderConfigured(testConfig),
+      colorize"\n${"aa".overlay("red")}\n${"bb".overlay("blue")}\n".render,
       s"\nredaa${R}\nbluebb$R\n",
     )
   }
 
   test("newlines in colorized strings") {
     assertEquals(
-      "\n".overlay("test").renderConfigured(testConfig),
+      "\n".overlay("test").render,
       s"test\n$R",
     )
   }
 
+  test("render RGB overlay in TrueColor mode") {
+
+    object colorizeTrue extends ConfiguredColorize(RenderConfig.trueColor.copy(resetString = R))
+
+    import colorizeTrue._
+
+    assertEquals(
+      "text".rgb(255, 0, 0).render,
+      s"\u001b[38;2;255;0;0mtext$R",
+    )
+  }
+
+  test("RGB throws if a value outside of the allowed range is used") {
+    intercept[IllegalArgumentException] {
+      "text".rgb(256, 0, 0)
+    }
+  }
+
+  test("ignore RGB overlay in Ansi mode") {
+    assertEquals(
+      "text".rgb(255, 0, 0).render,
+      "text",
+    )
+  }
+
+  test("default colorize") {
+    import org.polyvariant.colorize._
+
+    assertEquals("test".red.render, s"${Console.RED}test${Console.RESET}")
+  }
 }
