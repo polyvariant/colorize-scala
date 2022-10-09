@@ -35,10 +35,24 @@ sealed trait ColorizedString extends Product with Serializable {
     color = Color.Ansi(newColor),
   )
 
-  def rgb(red: Int, green: Int, blue: Int): ColorizedString = ColorizedString.Overlay(
-    underlying = this,
-    color = Color.Rgb(red, green, blue),
-  )
+  /** Colorize the string with an RGB value. Note: color values must be in the range 0-255.
+    * Otherwise, this function will throw an exception.
+    *
+    * Additionally, for RGB colors to be rendered, you need to use a `colorize` variant that
+    * supports them, and to actually see them your terminal needs to have truecolor support.
+    *
+    * Consult the README of this project for more information.
+    */
+  def rgb(red: Int, green: Int, blue: Int): ColorizedString = {
+    require(red >= 0 && red <= 255, "red must be in range [0, 255]")
+    require(green >= 0 && green <= 255, "green must be in range [0, 255]")
+    require(blue >= 0 && blue <= 255, "blue must be in range [0, 255]")
+
+    ColorizedString.Overlay(
+      underlying = this,
+      color = Color.Rgb(red, green, blue),
+    )
+  }
 
   def colored(pickColor: AnsiColor => String): ColorizedString = overlay(pickColor(Console))
 
@@ -85,7 +99,9 @@ object ColorizedString {
 
   private[colorize] object Color {
     final case class Ansi(prefix: String) extends Color
+
     final case class Rgb(red: Int, green: Int, blue: Int) extends Color
+
   }
 
   val empty = wrap("")

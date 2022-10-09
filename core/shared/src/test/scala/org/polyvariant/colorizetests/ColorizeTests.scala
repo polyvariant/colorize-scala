@@ -120,6 +120,12 @@ class ColorizeTests extends munit.FunSuite {
     )
   }
 
+  test("RGB throws if a value outside of the allowed range is used") {
+    intercept[IllegalArgumentException] {
+      "text".rgb(256, 0, 0)
+    }
+  }
+
   test("ignore RGB overlay in Ansi mode") {
     assertEquals(
       "text".rgb(255, 0, 0).render,
