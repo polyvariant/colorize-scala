@@ -50,12 +50,31 @@ println("hello".red.render) // like this
 You can customize rendering, currently this is limited to passing a custom color suffix.
 Internally, `colorize` works by prepending the desired color sequence to your string and appending a suffix, and `render`'s default suffix is `Console.RESET`.
 
-To apply customizations, use `renderConfigured`:
+## RGB color support
 
-```scala mdoc
-println("hello".overlay("<RED>").renderConfigured(RenderConfig(resetString = "<RESET>")))
+If your terminal supports truecolor, you can display text colorized to an exact RGB value.
+Instead of the default import, use:
+
+```scala mdoc:reset
+import org.polyvariant.colorize.trueColor._
+
+"hello".rgb(255, 0, 0).render
 ```
 
 ## Color removal
 
 To remove all colors and other overlays from a colorized string, use `.dropOverlays`.
+
+## Customization
+
+To apply customizations, you can make your own `colorize` by extending `ConfiguredColorize`. For example:
+
+```scala mdoc:reset
+import org.polyvariant.colorize.custom._
+
+object myColorize extends ConfiguredColorize(RenderConfig.Default.copy(resetString = "<RESET>"))
+
+import myColorize._
+
+println("hello".overlay("<RED>").render)
+```

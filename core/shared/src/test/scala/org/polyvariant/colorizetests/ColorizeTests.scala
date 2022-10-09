@@ -16,8 +16,9 @@
 
 package org.polyvariant.colorizetests
 
-import org.polyvariant.colorize.ConfiguredColorize
-import org.polyvariant.colorize.RenderConfig
+import org.polyvariant.colorize.custom.ConfiguredColorize
+import org.polyvariant.colorize.custom.RenderConfig
+import org.polyvariant.colorize.string.ColorizedString
 
 class ColorizeTests extends munit.FunSuite {
   private val R = "_RESET_"
@@ -109,9 +110,10 @@ class ColorizeTests extends munit.FunSuite {
 
   test("render RGB overlay in TrueColor mode") {
 
-    val colorizeTrue = new ConfiguredColorize(RenderConfig.trueColor.copy(resetString = R))
+    object colorizeTrue extends ConfiguredColorize(RenderConfig.trueColor.copy(resetString = R))
 
     import colorizeTrue._
+
     assertEquals(
       "text".rgb(255, 0, 0).render,
       s"\u001b[38;2;255;0;0mtext$R",

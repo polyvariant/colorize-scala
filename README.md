@@ -21,9 +21,9 @@ You can colorize any string by calling `.colorize`, `.overlay`, or one of the de
 
 ```scala
 "hello".red
-// res0: ColorizedString = Overlay(
+// res0: string.ColorizedString = Overlay(
 //   underlying = Wrap(s = "hello"),
-//   prefix = "\u001b[31m"
+//   color = Ansi(prefix = "\u001b[31m")
 // )
 ```
 
@@ -32,12 +32,15 @@ This also applies if the string is part of a larger colored string:
 
 ```scala
 colorize"hello ${"world".blue}.red"
-// res1: ColorizedString = Concat(
+// res1: string.ColorizedString = Concat(
 //   lhs = Wrap(s = "hello "),
 //   rhs = Concat(
 //     lhs = Wrap(s = ""),
 //     rhs = Concat(
-//       lhs = Overlay(underlying = Wrap(s = "world"), prefix = "\u001b[34m"),
+//       lhs = Overlay(
+//         underlying = Wrap(s = "world"),
+//         color = Ansi(prefix = "\u001b[34m")
+//       ),
 //       rhs = Wrap(s = ".red")
 //     )
 //   )
@@ -51,9 +54,15 @@ You can also combine colorized strings with `++`:
 
 ```scala
 "hello ".red ++ "world".blue
-// res2: ColorizedString = Concat(
-//   lhs = Overlay(underlying = Wrap(s = "hello "), prefix = "\u001b[31m"),
-//   rhs = Overlay(underlying = Wrap(s = "world"), prefix = "\u001b[34m")
+// res2: string.ColorizedString = Concat(
+//   lhs = Overlay(
+//     underlying = Wrap(s = "hello "),
+//     color = Ansi(prefix = "\u001b[31m")
+//   ),
+//   rhs = Overlay(
+//     underlying = Wrap(s = "world"),
+//     color = Ansi(prefix = "\u001b[34m")
+//   )
 // )
 ```
 
@@ -68,13 +77,33 @@ println("hello".red.render) // like this
 You can customize rendering, currently this is limited to passing a custom color suffix.
 Internally, `colorize` works by prepending the desired color sequence to your string and appending a suffix, and `render`'s default suffix is `Console.RESET`.
 
-To apply customizations, use `renderConfigured`:
+## RGB color support
+
+If your terminal supports truecolor, you can display text colorized to an exact RGB value.
+Instead of the default import, use:
 
 ```scala
-println("hello".overlay("<RED>").renderConfigured(RenderConfig(resetString = "<RESET>")))
-// <RED>hello<RESET>
+import org.polyvariant.colorize.trueColor._
+
+"hello".rgb(255, 0, 0).render
+// res5: String = "\u001b[38;2;255;0;0mhello\u001b[0m"
 ```
 
 ## Color removal
 
 To remove all colors and other overlays from a colorized string, use `.dropOverlays`.
+
+## Customization
+
+To apply customizations, you can make your own `colorize` by extending `ConfiguredColorize`. For example:
+
+```scala
+import org.polyvariant.colorize.custom._
+
+object myColorize extends ConfiguredColorize(RenderConfig.Default.copy(resetString = "<RESET>"))
+
+import myColorize._
+
+println("hello".overlay("<RED>").render)
+// <RED>hello<RESET>
+```
