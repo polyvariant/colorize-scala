@@ -173,7 +173,10 @@ object colorize {
       else
         ansi
 
-    val ansi: RenderConfig = RenderConfig(mode = ColorMode.Ansi, resetString = Console.RESET)
+    val ansi: RenderConfig = RenderConfig(
+      mode = ColorMode.Ansi,
+      resetString = Console.RESET,
+    )
 
     val trueColor: RenderConfig = RenderConfig(
       mode = ColorMode.TrueColor,
