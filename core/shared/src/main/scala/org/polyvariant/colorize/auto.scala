@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.polyvariant
+package org.polyvariant.colorize
 
-import org.polyvariant.colorize.custom._
+import org.polyvariant.colorize.custom.ConfiguredColorize
+import org.polyvariant.colorize.custom.RenderConfig
 
-package object colorize extends ConfiguredColorize(RenderConfig.Default)
+object auto extends ConfiguredColorize(RenderConfig.auto)

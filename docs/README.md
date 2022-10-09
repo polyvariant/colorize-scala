@@ -61,6 +61,22 @@ import org.polyvariant.colorize.trueColor._
 "hello".rgb(255, 0, 0).render
 ```
 
+To automatically detect RGB support, use:
+
+```scala mdoc:reset:silent
+import org.polyvariant.colorize.auto._
+
+"hello".rgb(255, 0, 0).render
+```
+
+If truecolor isn't available, `rgb` will be ignored. You can use this to implement an ANSI fallback:
+
+```scala mdoc:silent
+// if RGB is ignored, `.red` will still be applied
+"hello".rgb(255, 0, 0).red.render
+```
+
+
 ## Color removal
 
 To remove all colors and other overlays from a colorized string, use `.dropOverlays`.
