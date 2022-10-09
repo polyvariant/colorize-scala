@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package org.polyvariant
+package org.polyvariant.colorize
 
-import org.polyvariant.colorize.ColorizedString.Concat
-import org.polyvariant.colorize.ColorizedString.Overlay
-import org.polyvariant.colorize.ColorizedString.Wrap
 import scala.io.AnsiColor
 
-object colorize {
+class ConfiguredColorize(config: RenderConfig) {
 
   implicit def liftStringToColored(s: String): ColorizedString = ColorizedString.wrap(s)
 
-  implicit class ColorizeStringContext(private val sc: StringContext) extends AnyVal {
+  implicit class ColorizeStringContext(private val sc: StringContext) {
 
     def colorize(args: ColorizedString*): ColorizedString = {
       // not available in Scala 2.12 - restore when 2.12 support is dropped
@@ -46,20 +43,22 @@ object colorize {
   }
 
   sealed trait ColorizedString {
-    def render: String = renderConfigured(RenderConfig.Default)
 
-    def renderConfigured(config: RenderConfig): String = {
+    import ColorizedString._
+
+    def render: String = {
 
       val render: (Color, String) => String =
         config.mode match {
-          case ColorMode.Ansi =>
+          case RenderConfig.ColorMode.Ansi =>
             (color, text) =>
               color match {
                 case Color.Ansi(prefix) => prefix + text + config.resetString
                 case _                  => text
               }
 
-          case ColorMode.TrueColor => (color, text) => color.prefix + text + config.resetString
+          case RenderConfig.ColorMode.TrueColor =>
+            (color, text) => color.prefix + text + config.resetString
         }
 
       def go(self: ColorizedString, currentColors: List[Color]): String =
@@ -119,74 +118,72 @@ object colorize {
     def invisible: ColorizedString = colored(_.INVISIBLE)
   }
 
-  private[colorize] sealed trait Color {
-    def prefix: String
-  }
-
-  private[colorize] object Color {
-    private[colorize] final case class Ansi(prefix: String) extends Color
-
-    private[colorize] final case class Rgb(red: Int, green: Int, blue: Int) extends Color {
-      def prefix: String = s"\u001b[38;2;$red;$green;${blue}m"
-    }
-
-  }
-
   object ColorizedString {
-    private[colorize] final case class Wrap(s: String) extends ColorizedString
+    private[ConfiguredColorize] case class Wrap(s: String) extends ColorizedString
 
-    private[colorize] final case class Overlay(underlying: ColorizedString, color: Color)
+    private[ConfiguredColorize] case class Overlay(underlying: ColorizedString, color: Color)
       extends ColorizedString
 
-    private[colorize] final case class Concat(lhs: ColorizedString, rhs: ColorizedString)
+    private[ConfiguredColorize] case class Concat(lhs: ColorizedString, rhs: ColorizedString)
       extends ColorizedString
-
-    private[colorize] sealed trait SuffixSetting extends Product with Serializable
 
     val empty = wrap("")
 
     def wrap(s: String): ColorizedString = Wrap(s)
   }
 
-  private[colorize] case class CurrentColor(value: String) extends AnyVal
+  private sealed trait Color {
+    def prefix: String
+  }
+
+  private object Color {
+    case class Ansi(prefix: String) extends Color
+
+    case class Rgb(red: Int, green: Int, blue: Int) extends Color {
+      def prefix: String = s"\u001b[38;2;$red;$green;${blue}m"
+    }
+
+  }
+
+  private case class CurrentColor(value: String)
+
+}
+
+final case class RenderConfig(
+  mode: RenderConfig.ColorMode,
+  resetString: String,
+)
+
+object RenderConfig {
+  private val TrueColorFlags = Set("truecolor", "24bit")
+
+  val Default: RenderConfig = RenderConfig(mode = ColorMode.Ansi, resetString = Console.RESET)
+
+  def determine: RenderConfig =
+    if (isTrueColor)
+      trueColor
+    else
+      ansi
+
+  val ansi: RenderConfig = RenderConfig(
+    mode = ColorMode.Ansi,
+    resetString = Console.RESET,
+  )
+
+  val trueColor: RenderConfig = RenderConfig(
+    mode = ColorMode.TrueColor,
+    resetString = Console.RESET,
+  )
+
+  private def isTrueColor: Boolean = EnvPlatform
+    .get("COLORTERM")
+    .exists(TrueColorFlags.contains)
 
   sealed trait ColorMode
 
   object ColorMode {
-    private[colorize] case object Ansi extends ColorMode
-    private[colorize] case object TrueColor extends ColorMode
-  }
-
-  final case class RenderConfig(
-    mode: ColorMode,
-    resetString: String,
-  )
-
-  object RenderConfig {
-    private val TrueColorFlags = Set("truecolor", "24bit")
-
-    val Default: RenderConfig = RenderConfig(mode = ColorMode.Ansi, resetString = Console.RESET)
-
-    def determine: RenderConfig =
-      if (isTrueColor)
-        trueColor
-      else
-        ansi
-
-    val ansi: RenderConfig = RenderConfig(
-      mode = ColorMode.Ansi,
-      resetString = Console.RESET,
-    )
-
-    val trueColor: RenderConfig = RenderConfig(
-      mode = ColorMode.TrueColor,
-      resetString = Console.RESET,
-    )
-
-    private def isTrueColor: Boolean = EnvPlatform
-      .get("COLORTERM")
-      .exists(TrueColorFlags.contains)
-
+    case object Ansi extends ColorMode
+    case object TrueColor extends ColorMode
   }
 
 }

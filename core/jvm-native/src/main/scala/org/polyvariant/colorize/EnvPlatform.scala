@@ -1,5 +1,5 @@
-package org.polyvariant
+package org.polyvariant.colorize
 
-private[polyvariant] object EnvPlatform {
+private[colorize] object EnvPlatform {
   def get(name: String): Option[String] = Option(System.getenv(name))
 }
