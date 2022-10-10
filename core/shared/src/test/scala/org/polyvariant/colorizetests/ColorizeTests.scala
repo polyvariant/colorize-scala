@@ -74,6 +74,13 @@ class ColorizeTests extends munit.FunSuite {
     )
   }
 
+  test("interpolator: wrap plain string") {
+    assertEquals(
+      colorize"${"s"}".render,
+      "s",
+    )
+  }
+
   test("interpolator: single color") {
     assertEquals(
       colorize"${"aa".overlay("red")}".render,
