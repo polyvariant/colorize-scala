@@ -24,4 +24,13 @@ trait Colorize[A] {
 
 object Colorize {
   def apply[A](implicit ev: Colorize[A]): Colorize[A] = ev
+
+  implicit val colorizedStringColorize: Colorize[ColorizedString] = identity(_)
+
+  /** A reification of the `Colorize` typeclass. If you see a type mismatch saying a
+    * `Colorize.Applied` is required, you're missing a `Colorize[A]`. When you implement it and make
+    * it available in implicit scope, an implicit conversion will be applied to your value whenever
+    * a Colorize.Applied is necessary.
+    */
+  final case class Applied(value: ColorizedString) extends AnyVal
 }

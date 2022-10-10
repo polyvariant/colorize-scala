@@ -140,14 +140,30 @@ class ColorizeTests extends munit.FunSuite {
     assertEquals("test".red.render, s"${Console.RED}test${Console.RESET}")
   }
 
-  test("use Colorize typeclass") {
+  test("Colorize typeclass instance allows interpolation") {
     case class Foo(s: String)
-    implicit val c: Colorize[Foo] = foo => foo.s.overlay("red")
+    implicit val c: Colorize[Foo] = _.s.overlay("red")
     val f = Foo("hello")
 
     assertEquals(
       colorize"$f".render,
       s"redhello$R",
+    )
+  }
+
+  test("Colorize doesn't define an implicit conversion to ColorizedString") {
+    case class Foo(s: String)
+    implicit val colorizeFoo: Colorize[Foo] = _.s.overlay("red")
+
+    implicitly[Foo => Colorize.Applied]
+
+    val e = compileErrors("implicitly[Foo => ColorizedString]")
+
+    assert(
+      e.contains(
+        "No implicit view available"
+      ),
+      s"The error message didn't contain the expected string. Message: <$e>",
     )
   }
 }
