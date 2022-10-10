@@ -141,6 +141,30 @@ class ColorizeTests extends munit.FunSuite {
     )
   }
 
+  test("stripMargin: default") {
+    assertEquals(
+      """hello
+        |world""".overlay("red").stripMargin.render,
+      s"redhello\nworld$R",
+    )
+  }
+
+  test("stripMargin: custom char") {
+    assertEquals(
+      """hello
+        -world""".overlay("red").stripMargin('-').render,
+      s"redhello\nworld$R",
+    )
+  }
+
+  test("double stripMargin") {
+    assertEquals(
+      """hello
+        -|world""".overlay("red").stripMargin('-').stripMargin('|').render,
+      s"redhello\nworld$R",
+    )
+  }
+
   test("default colorize") {
     import org.polyvariant.colorize._
 
