@@ -66,13 +66,14 @@ You can also combine colorized strings with `++`:
 // )
 ```
 
-You can define colorization using `Colorize` typeclass.
+You can define a default way to colorize a type by creating an instance of the `Colorize` typeclass.
+
 ```scala
 case class Taco(size: Int)
 
 implicit val tacoColorize: Colorize[Taco] =
   taco => "Taco(".cyan ++ "size".yellow ++ " = " ++ taco.size.toString.red ++ ")".cyan
-  
+
 val taco = Taco(2)
 
 colorize"you can colorize $taco"
