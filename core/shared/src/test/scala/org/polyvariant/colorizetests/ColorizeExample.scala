@@ -23,10 +23,7 @@ object ColorizeExample extends App {
   final case class Taco(size: Int)
 
   implicit val tacoColorize: Colorize[Taco] =
-    taco =>
-      "Taco(".cyan ++
-        "size".yellow ++ " = " ++ taco.size.toString.red ++
-        ")".cyan
+    taco => "Taco(".cyan ++ "size".yellow ++ " = " ++ taco.size.toString.red ++ ")".cyan
 
   val taco = Taco(2)
 

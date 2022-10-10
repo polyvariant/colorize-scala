@@ -66,6 +66,18 @@ You can also combine colorized strings with `++`:
 // )
 ```
 
+You can define colorization using `Colorize` typeclass.
+```scala
+case class Taco(size: Int)
+
+implicit val tacoColorize: Colorize[Taco] =
+  taco => "Taco(".cyan ++ "size".yellow ++ " = " ++ taco.size.toString.red ++ ")".cyan
+  
+val taco = Taco(2)
+
+colorize"you can colorize $taco"
+```
+
 ## Rendering
 
 To actually render a colorized string, call `.render`.
@@ -86,7 +98,7 @@ Instead of the default import, use:
 import org.polyvariant.colorize.trueColor._
 
 "hello".rgb(255, 0, 0).render
-// res5: String = "\u001b[38;2;255;0;0mhello\u001b[0m"
+// res6: String = "\u001b[38;2;255;0;0mhello\u001b[0m"
 ```
 
 To automatically detect RGB support, use:
