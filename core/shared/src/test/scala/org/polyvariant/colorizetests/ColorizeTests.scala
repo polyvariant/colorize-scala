@@ -16,6 +16,7 @@
 
 package org.polyvariant.colorizetests
 
+import org.polyvariant.colorize.Colorize
 import org.polyvariant.colorize.custom.ConfiguredColorize
 import org.polyvariant.colorize.custom.RenderConfig
 import org.polyvariant.colorize.string.ColorizedString
@@ -137,5 +138,32 @@ class ColorizeTests extends munit.FunSuite {
     import org.polyvariant.colorize._
 
     assertEquals("test".red.render, s"${Console.RED}test${Console.RESET}")
+  }
+
+  test("Colorize typeclass instance allows interpolation") {
+    case class Foo(s: String)
+    implicit val c: Colorize[Foo] = _.s.overlay("red")
+    val f = Foo("hello")
+
+    assertEquals(
+      colorize"$f".render,
+      s"redhello$R",
+    )
+  }
+
+  test("Colorize doesn't define an implicit conversion to ColorizedString") {
+    case class Foo(s: String)
+    implicit val colorizeFoo: Colorize[Foo] = _.s.overlay("red")
+
+    implicitly[Foo => Colorize.Applied]
+
+    val e = compileErrors("implicitly[Foo => ColorizedString]")
+
+    assert(
+      e.contains(
+        "No implicit view available"
+      ),
+      s"The error message didn't contain the expected string. Message: <$e>",
+    )
   }
 }

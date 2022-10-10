@@ -17,6 +17,7 @@
 package org.polyvariant.colorize.custom
 
 import org.polyvariant.colorize.string.ColorizedString
+import org.polyvariant.colorize.Colorize
 import org.polyvariant.colorize.EnvPlatform
 
 class ConfiguredColorize(config: RenderConfig) {
@@ -25,9 +26,13 @@ class ConfiguredColorize(config: RenderConfig) {
 
   implicit final def liftStringToColored(s: String): ColorizedString = ColorizedString.wrap(s)
 
+  implicit final def colorizeToApplied[A: Colorize](
+    a: A
+  ): Colorize.Applied = Colorize.Applied(Colorize[A].colorize(a))
+
   implicit final class ColorizeStringContext(private val sc: StringContext) {
 
-    def colorize(args: ColorizedString*): ColorizedString = {
+    def colorize(args: Colorize.Applied*): ColorizedString = {
       // not available in Scala 2.12 - restore when 2.12 support is dropped
       // StringContext.checkLengths(args, sc.parts)
       assert(
@@ -39,7 +44,7 @@ class ConfiguredColorize(config: RenderConfig) {
 
       ColorizedString.wrap(partsEscaped.head) ++ args
         .zip(partsEscaped.tail)
-        .map { case (p, s) => p ++ ColorizedString.wrap(s) }
+        .map { case (p, s) => p.value ++ ColorizedString.wrap(s) }
         .foldLeft(ColorizedString.empty)(_ ++ _)
     }
 

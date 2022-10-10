@@ -39,6 +39,19 @@ You can also combine colorized strings with `++`:
 "hello ".red ++ "world".blue
 ```
 
+You can define a default way to colorize a type by creating an instance of the `Colorize` typeclass.
+
+```scala mdoc:silent
+case class Taco(size: Int)
+
+implicit val tacoColorize: Colorize[Taco] =
+  taco => "Taco(".cyan ++ "size".yellow ++ " = " ++ taco.size.toString.red ++ ")".cyan
+
+val taco = Taco(2)
+
+colorize"you can colorize $taco"
+```
+
 ## Rendering
 
 To actually render a colorized string, call `.render`.
