@@ -25,6 +25,7 @@ trait Colorize[A] {
 object Colorize {
   def apply[A](implicit ev: Colorize[A]): Colorize[A] = ev
 
+  implicit val stringColorize: Colorize[String] = ColorizedString.wrap(_)
   implicit val colorizedStringColorize: Colorize[ColorizedString] = identity(_)
 
   /** A reification of the `Colorize` typeclass. If you see a type mismatch saying a

@@ -79,6 +79,8 @@ class ConfiguredColorize(config: RenderConfig) {
         case Wrap(s) => currentColors.foldLeft(s)((text, color) => renderColor(color, text))
         case Overlay(underlying, color) => go(underlying, color :: currentColors)
         case Concat(lhs, rhs)           => go(lhs, currentColors) + go(rhs, currentColors)
+        case StripMargin(underlying, char) =>
+          Predef.augmentString(go(underlying, currentColors)).stripMargin(char)
       }
 
     go(s, currentColors = Nil)

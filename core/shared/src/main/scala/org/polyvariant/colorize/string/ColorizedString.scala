@@ -28,6 +28,9 @@ sealed trait ColorizedString extends Product with Serializable {
 
   def ++(another: ColorizedString): ColorizedString = ColorizedString.Concat(this, another)
 
+  def stripMargin: ColorizedString = stripMargin('|')
+  def stripMargin(char: Char): ColorizedString = ColorizedString.StripMargin(this, char)
+
   def overlay(
     newColor: String
   ): ColorizedString = ColorizedString.Overlay(
@@ -58,9 +61,10 @@ sealed trait ColorizedString extends Product with Serializable {
 
   def dropOverlays: ColorizedString =
     this match {
-      case Overlay(underlying, _) => underlying.dropOverlays
-      case w @ Wrap(_)            => w
-      case Concat(lhs, rhs)       => Concat(lhs.dropOverlays, rhs.dropOverlays)
+      case Overlay(underlying, _)        => underlying.dropOverlays
+      case w @ Wrap(_)                   => w
+      case Concat(lhs, rhs)              => Concat(lhs.dropOverlays, rhs.dropOverlays)
+      case StripMargin(underlying, char) => StripMargin(underlying.dropOverlays, char)
     }
 
   def black: ColorizedString = colored(_.BLACK)
@@ -93,6 +97,9 @@ object ColorizedString {
     extends ColorizedString
 
   private[colorize] final case class Concat(lhs: ColorizedString, rhs: ColorizedString)
+    extends ColorizedString
+
+  private[colorize] final case class StripMargin(underlying: ColorizedString, char: Char)
     extends ColorizedString
 
   private[colorize] sealed trait Color extends Product with Serializable
