@@ -24,6 +24,4 @@ trait Colorize[A] {
 
 object Colorize {
   def apply[A](implicit ev: Colorize[A]): Colorize[A] = ev
-
-  implicit val stringColorize: Colorize[String] = s => ColorizedString.wrap(s)
 }
