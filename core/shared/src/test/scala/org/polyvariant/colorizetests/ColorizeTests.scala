@@ -16,6 +16,7 @@
 
 package org.polyvariant.colorizetests
 
+import org.polyvariant.colorize.Colorize
 import org.polyvariant.colorize.custom.ConfiguredColorize
 import org.polyvariant.colorize.custom.RenderConfig
 import org.polyvariant.colorize.string.ColorizedString
@@ -137,5 +138,16 @@ class ColorizeTests extends munit.FunSuite {
     import org.polyvariant.colorize._
 
     assertEquals("test".red.render, s"${Console.RED}test${Console.RESET}")
+  }
+
+  test("use Colorize typeclass") {
+    case class Foo(s: String)
+    implicit val c: Colorize[Foo] = foo => foo.s.overlay("red")
+    val f = Foo("hello")
+
+    assertEquals(
+      colorize"$f".render,
+      s"redhello$R",
+    )
   }
 }

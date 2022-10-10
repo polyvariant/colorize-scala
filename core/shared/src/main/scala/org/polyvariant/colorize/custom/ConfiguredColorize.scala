@@ -17,13 +17,14 @@
 package org.polyvariant.colorize.custom
 
 import org.polyvariant.colorize.string.ColorizedString
+import org.polyvariant.colorize.Colorize
 import org.polyvariant.colorize.EnvPlatform
 
 class ConfiguredColorize(config: RenderConfig) {
 
   implicit final val configuredColorize: ConfiguredColorize = this
 
-  implicit final def liftStringToColored(s: String): ColorizedString = ColorizedString.wrap(s)
+  implicit final def colorizeToColored[A: Colorize](a: A): ColorizedString = Colorize[A].colorize(a)
 
   implicit final class ColorizeStringContext(private val sc: StringContext) {
 

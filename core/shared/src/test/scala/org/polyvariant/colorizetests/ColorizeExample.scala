@@ -20,6 +20,16 @@ object ColorizeExample extends App {
 
   import org.polyvariant.colorize._
 
+  final case class Taco(size: Int)
+
+  implicit val tacoColorize: Colorize[Taco] =
+    taco =>
+      "Taco(".cyan ++
+        "size".yellow ++ " = " ++ taco.size.toString.red ++
+        ")".cyan
+
+  val taco = Taco(2)
+
   val s = colorize"""hello, ${"red".red} world! This ${"text".green} is mostly blue.""".blue
 
   val s2 =
@@ -33,9 +43,12 @@ object ColorizeExample extends App {
   val s5 =
     colorize"${"R".rgb(255, 0, 0)}${"G".rgb(0, 255, 0)}${"B".rgb(0, 0, 255)} colors are available too!"
 
+  val s6 = colorize"you can colorize $taco using Colorize typeclass"
+
   println(s.render)
   println(s2.render)
   println(s3.render)
   println(s4.render)
   println(s5.render)
+  println(s6.render)
 }
