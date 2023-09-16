@@ -31,7 +31,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform, NativePlatform)
     name := "colorize",
     commonSettings,
     libraryDependencies ++= Seq(
-      "org.scalameta" %%% "munit" % "1.0.0-M6" % Test
+      "org.scalameta" %%% "munit" % "1.0.0-M10" % Test
     ),
   )
 
