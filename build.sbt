@@ -20,6 +20,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / tlFatalWarnings := false
 
+ThisBuild / mergifyStewardConfig ~= (_.map(_.withMergeMinors(true)))
+
 val commonSettings = Seq(
   libraryDependencies ++= compilerPlugins
 )
