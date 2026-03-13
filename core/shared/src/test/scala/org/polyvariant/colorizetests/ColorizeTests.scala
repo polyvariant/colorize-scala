@@ -191,9 +191,7 @@ class ColorizeTests extends munit.FunSuite {
     val e = compileErrors("implicitly[Foo => ColorizedString]")
 
     assert(
-      e.contains(
-        "No implicit view available"
-      ),
+      e.contains("No implicit view available") || e.contains("No given instance"),
       s"The error message didn't contain the expected string. Message: <$e>",
     )
   }
