@@ -14,7 +14,7 @@ val compilerPlugins = List(
 val Scala213 = "2.13.18"
 
 ThisBuild / scalaVersion := Scala213
-ThisBuild / crossScalaVersions := Seq("2.12.20", Scala213, "3.3.7")
+ThisBuild / crossScalaVersions := Seq("2.12.21", Scala213, "3.3.7")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
